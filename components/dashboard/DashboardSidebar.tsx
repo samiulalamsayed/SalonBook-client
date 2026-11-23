@@ -53,14 +53,23 @@ const DashboardSidebar = () => {
             return pathname === href;
         }
 
-        // Add New Service-এর জন্য শুধু exact route active হবে
+        // Exact match for Add New Service
         if (href === "/admin/services/new") {
             return pathname === href;
         }
 
+        // Manage Services should not be active on Add New Service page
+        if (href === "/admin/services") {
+            return (
+                pathname === href ||
+                (pathname.startsWith(`${href}/`) &&
+                    pathname !== "/admin/services/new")
+            );
+        }
+
         return pathname === href || pathname.startsWith(`${href}/`);
     };
-
+    
     const sidebarContent = (
         <>
             <div className="mb-8">
@@ -81,8 +90,8 @@ const DashboardSidebar = () => {
                             href={link.href}
                             onClick={() => setIsMobileOpen(false)}
                             className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${isActive(link.href)
-                                    ? "bg-primary text-primary-foreground"
-                                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                ? "bg-primary text-primary-foreground"
+                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                 }`}
                         >
                             <Icon size={19} />
