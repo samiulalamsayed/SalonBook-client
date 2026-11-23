@@ -26,10 +26,10 @@ export const registerWithEmail = (values: RegisterFormValues) => {
 export const loginWithGoogle = () => {
     return authClient.signIn.social({
         provider: "google",
-        callbackURL: "/",
+        callbackURL: "https://salon-book-client-zeta.vercel.app/",
+        errorCallbackURL: "https://salon-book-client-zeta.vercel.app/sign-in",
     });
 };
-
 // Logout
 export const logout = () => {
     return authClient.signOut();
