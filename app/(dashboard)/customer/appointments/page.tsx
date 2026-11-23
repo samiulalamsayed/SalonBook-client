@@ -15,6 +15,7 @@ import {
 import { toast } from "react-toastify";
 
 import { apiFetch } from "@/lib/api";
+import AppointmentDetailsModal from "@/components/dashboard/AppointmentDetailsModal";
 
 interface Service {
     _id: string;
@@ -27,12 +28,14 @@ interface Service {
 
 interface Appointment {
     _id: string;
-    serviceId: Service;
+    serviceId: Service | null;
     appointmentDate: string;
     appointmentTime: string;
+    phoneNumber?: string;
     totalAmount: number;
     status: "pending" | "confirmed" | "cancelled" | "completed";
     paymentStatus: "unpaid" | "paid";
+    message?: string;
     createdAt: string;
 }
 
@@ -87,6 +90,9 @@ const MyAppointmentsPage = () => {
     const [selectedAppointmentId, setSelectedAppointmentId] = useState<
         string | null
     >(null);
+
+    const [selectedAppointmentForDetails, setSelectedAppointmentForDetails] =
+        useState<Appointment | null>(null);
 
     // Fetch Appointments
     const fetchAppointments = async () => {
@@ -446,13 +452,14 @@ const MyAppointmentsPage = () => {
                                                 )}
 
                                             {/* View Details */}
-                                            <Link
-                                                href={`/customer/appointments/${appointment._id}`}
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectedAppointmentForDetails(appointment)}
                                                 className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
                                             >
                                                 View Details
                                                 <ArrowRight size={15} />
-                                            </Link>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -514,6 +521,14 @@ const MyAppointmentsPage = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Appointment Details Modal */}
+            {selectedAppointmentForDetails && (
+                <AppointmentDetailsModal
+                    appointment={selectedAppointmentForDetails}
+                    onClose={() => setSelectedAppointmentForDetails(null)}
+                />
             )}
         </div>
     );
