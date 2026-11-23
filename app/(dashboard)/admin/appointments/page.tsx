@@ -12,6 +12,7 @@ import {
     XCircle,
     Search,
     X,
+    Phone,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -38,6 +39,7 @@ interface Appointment {
     serviceId: Service | null;
     appointmentDate: string;
     appointmentTime: string;
+    phoneNumber?: string;
     totalAmount: number;
     status: "pending" | "confirmed" | "cancelled" | "completed";
     paymentStatus: "unpaid" | "paid";
@@ -457,6 +459,8 @@ const AdminAppointmentsPage = () => {
                                     </div>
                                 </div>
 
+
+
                                 {/* Actions */}
                                 <div className="mt-5 flex flex-wrap justify-end gap-2 border-t pt-4">
                                     <button
@@ -548,6 +552,26 @@ const AdminAppointmentsPage = () => {
                                 <p className="text-sm text-muted-foreground">
                                     {selectedAppointment.customer?.email || "N/A"}
                                 </p>
+                                {/* Customer Mobile Number */}
+                                <div className="mt-3">
+                                    <p className="text-xs text-muted-foreground">
+                                        Customer Mobile Number
+                                    </p>
+
+                                    {selectedAppointment.phoneNumber ? (
+                                        <a
+                                            href={`tel:${selectedAppointment.phoneNumber}`}
+                                            className="mt-1 inline-flex items-center gap-2 font-semibold text-primary hover:underline"
+                                        >
+                                            <Phone size={16} />
+                                            {selectedAppointment.phoneNumber}
+                                        </a>
+                                    ) : (
+                                        <p className="mt-1 text-sm text-muted-foreground">
+                                            Not provided
+                                        </p>
+                                    )}
+                                </div>
                             </div>
 
                             <div>
@@ -683,8 +707,8 @@ const AdminAppointmentsPage = () => {
                                 disabled={updatingId !== null}
                                 onClick={handleStatusUpdate}
                                 className={`rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-50 ${confirmation.status === "confirmed"
-                                        ? "bg-emerald-600 hover:bg-emerald-700"
-                                        : "bg-destructive hover:bg-destructive/90"
+                                    ? "bg-emerald-600 hover:bg-emerald-700"
+                                    : "bg-destructive hover:bg-destructive/90"
                                     }`}
                             >
                                 {updatingId
