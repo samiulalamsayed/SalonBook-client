@@ -6,6 +6,7 @@ import Footer from "@/components/layout/Footer";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
+import { AuthProvider } from "@/components/providers/auth-provider";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -51,7 +52,10 @@ export default function RootLayout({
         >
           <Navbar />
           <main>
-            {children}
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+
           </main>
           <Footer />
         </ThemeProvider>
