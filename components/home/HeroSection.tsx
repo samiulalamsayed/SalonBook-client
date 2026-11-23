@@ -32,23 +32,22 @@ const HeroSection = () => {
                     </p>
 
                     <div className="flex flex-wrap gap-4">
-                        <Button size="lg" className="rounded-full px-7" asChild>
-                            <Link href="/services">
-                                Explore Salon Services
-                                <ArrowRight size={18} />
-                            </Link>
-                        </Button>
-
-                        <Button
-                            size="lg"
-                            variant="outline"
-                            className="rounded-full border-rose-200 px-7 text-gray-800 hover:bg-rose-50"
-                            asChild
+                        <Link
+                            href="/services"
+                            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary px-7 text-sm font-medium text-primary-foreground shadow-sm transition hover:bg-primary/90"
                         >
-                            <Link href="/sign-up">Get Started</Link>
-                        </Button>
-                    </div>
+                            Explore Salon Services
+                            <ArrowRight size={18} />
+                        </Link>
 
+                        <Link
+                            href="/sign-up"
+                            className="inline-flex h-11 items-center justify-center rounded-full border border-rose-200 px-7 text-sm font-medium text-gray-800 transition hover:bg-rose-50"
+                        >
+                            Get Started
+                        </Link>
+                    </div>
+                    
                     <div className="flex flex-wrap gap-8 border-t border-rose-100 pt-7">
                         <div>
                             <h3 className="text-2xl font-bold text-gray-900">20+</h3>
