@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-
 import "./globals.css";
+import "react-toastify/dist/ReactToastify.css";
+
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { ToastContainer } from "react-toastify";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -50,14 +52,22 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
-          <main>
-            <AuthProvider>
-              {children}
-            </AuthProvider>
+          <AuthProvider>
+            <Navbar />
 
-          </main>
-          <Footer />
+            <main>{children}</main>
+
+            <Footer />
+          </AuthProvider>
+
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            newestOnTop
+            closeOnClick
+            pauseOnHover
+            theme="light"
+          />
         </ThemeProvider>
       </body>
     </html>

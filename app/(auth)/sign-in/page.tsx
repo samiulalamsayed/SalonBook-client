@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
-import { Mail, Lock } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 import {
     loginSchema,
@@ -23,6 +23,7 @@ export default function SignInPage() {
 
     const [isLoading, setIsLoading] = useState(false);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const {
         register,
@@ -148,10 +149,25 @@ export default function SignInPage() {
 
                             <input
                                 {...register("password")}
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 placeholder="Enter your password"
-                                className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-black"
+                                className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-12 text-sm outline-none transition focus:border-black"
                             />
+
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
+                                aria-label={
+                                    showPassword ? "Hide password" : "Show password"
+                                }
+                            >
+                                {showPassword ? (
+                                    <EyeOff size={18} />
+                                ) : (
+                                    <Eye size={18} />
+                                )}
+                            </button>
                         </div>
 
                         {errors.password && (

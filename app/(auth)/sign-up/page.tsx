@@ -6,7 +6,16 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
-import { User, Mail, Lock, Image as ImageIcon } from "lucide-react";
+import {
+    User,
+    Mail,
+    Lock,
+    Image as ImageIcon,
+    Eye,
+    EyeOff,
+    Upload,
+    X,
+} from "lucide-react";
 
 import {
     registerSchema,
@@ -23,10 +32,17 @@ export default function SignupPage() {
 
     const [isLoading, setIsLoading] = useState(false);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+
+    const [imageMode, setImageMode] = useState<"upload" | "url">("upload");
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewImage, setPreviewImage] = useState("");
 
     const {
         register,
         handleSubmit,
+        setValue,
+        watch,
         formState: { errors },
     } = useForm<RegisterFormValues>({
         resolver: zodResolver(registerSchema),
@@ -38,12 +54,73 @@ export default function SignupPage() {
         },
     });
 
-    // Email Registration
+    const imageUrl = watch("image");
+
+    // Profile Picture Selection
+    const handleImageChange = (file: File | undefined) => {
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please select a valid image.");
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("Image size must be less than 5MB.");
+            return;
+        }
+
+        setSelectedFile(file);
+        setPreviewImage(URL.createObjectURL(file));
+        setValue("image", "");
+    };
+
+    // Remove Profile Picture
+    const removeImage = () => {
+        setSelectedFile(null);
+        setPreviewImage("");
+        setValue("image", "");
+    };
+
+    // Upload Image to Backend
+    const uploadProfileImage = async () => {
+        if (!selectedFile) return imageUrl || undefined;
+
+        const formData = new FormData();
+        formData.append("image", selectedFile);
+
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/upload`,
+            {
+                method: "POST",
+                body: formData,
+            }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || "Image upload failed.");
+        }
+
+        if (!result.imageUrl) {
+            throw new Error("Image URL was not returned by the server.");
+        }
+
+        return result.imageUrl as string;
+    };
+
+    // Email Sign Up
     const onSubmit = async (values: RegisterFormValues) => {
         try {
             setIsLoading(true);
 
-            const { error } = await registerWithEmail(values);
+            const profileImage = await uploadProfileImage();
+
+            const { error } = await registerWithEmail({
+                ...values,
+                image: profileImage || undefined,
+            });
 
             if (error) {
                 toast.error(error.message);
@@ -51,20 +128,19 @@ export default function SignupPage() {
             }
 
             toast.success("Account created successfully!");
-
             router.push("/customer");
         } catch (error) {
             toast.error(
                 error instanceof Error
                     ? error.message
-                    : "Registration failed."
+                    : "Sign up failed."
             );
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Google Registration
+    // Google Sign Up
     const handleGoogleSignup = async () => {
         try {
             setIsGoogleLoading(true);
@@ -83,7 +159,6 @@ export default function SignupPage() {
 
     return (
         <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-10">
-
             <div className="w-full max-w-md rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
 
                 {/* Header */}
@@ -97,7 +172,6 @@ export default function SignupPage() {
                     </p>
                 </div>
 
-                {/* Signup Form */}
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
                     {/* Full Name */}
@@ -168,10 +242,23 @@ export default function SignupPage() {
 
                             <input
                                 {...register("password")}
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 placeholder="Create a password"
-                                className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-black"
+                                className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-12 text-sm outline-none transition focus:border-black"
                             />
+
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
+                                aria-label={showPassword ? "Hide password" : "Show password"}
+                            >
+                                {showPassword ? (
+                                    <EyeOff size={18} />
+                                ) : (
+                                    <Eye size={18} />
+                                )}
+                            </button>
                         </div>
 
                         {errors.password && (
@@ -185,43 +272,133 @@ export default function SignupPage() {
                         </p>
                     </div>
 
-                    {/* Profile Image URL */}
+                    {/* Profile Picture */}
                     <div>
                         <label className="mb-2 block text-sm font-medium text-gray-700">
-                            Profile Image URL
-                            <span className="ml-1 text-gray-400">
-                                (Optional)
-                            </span>
+                            Profile Picture
+                            <span className="ml-1 text-gray-400">(Optional)</span>
                         </label>
 
-                        <div className="relative">
-                            <ImageIcon
-                                size={18}
-                                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                            />
+                        {/* Image Options */}
+                        <div className="mb-3 flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setImageMode("upload");
+                                    removeImage();
+                                }}
+                                className={`flex-1 rounded-lg border py-2 text-sm font-medium transition ${imageMode === "upload"
+                                        ? "border-black bg-black text-white"
+                                        : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                                    }`}
+                            >
+                                <Upload size={15} className="mr-2 inline" />
+                                Upload Image
+                            </button>
 
-                            <input
-                                {...register("image")}
-                                type="url"
-                                placeholder="https://example.com/image.jpg"
-                                className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-black"
-                            />
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setImageMode("url");
+                                    removeImage();
+                                }}
+                                className={`flex-1 rounded-lg border py-2 text-sm font-medium transition ${imageMode === "url"
+                                        ? "border-black bg-black text-white"
+                                        : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                                    }`}
+                            >
+                                <ImageIcon size={15} className="mr-2 inline" />
+                                Image URL
+                            </button>
                         </div>
 
-                        {errors.image && (
-                            <p className="mt-1 text-xs text-red-500">
-                                {errors.image.message}
-                            </p>
+                        {/* Upload Option */}
+                        {imageMode === "upload" && (
+                            <div>
+                                {!previewImage ? (
+                                    <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 px-4 py-7 text-center transition hover:border-black">
+                                        <Upload size={25} className="mb-2 text-gray-400" />
+
+                                        <span className="text-sm font-medium text-gray-700">
+                                            Click to upload a profile picture
+                                        </span>
+
+                                        <span className="mt-1 text-xs text-gray-400">
+                                            PNG, JPG or WEBP (Max 5MB)
+                                        </span>
+
+                                        <input
+                                            type="file"
+                                            accept="image/png,image/jpeg,image/webp"
+                                            className="hidden"
+                                            onChange={(e) =>
+                                                handleImageChange(e.target.files?.[0])
+                                            }
+                                        />
+                                    </label>
+                                ) : (
+                                    <div className="relative mx-auto w-fit">
+                                        <img
+                                            src={previewImage}
+                                            alt="Profile preview"
+                                            className="h-24 w-24 rounded-full border object-cover"
+                                        />
+
+                                        <button
+                                            type="button"
+                                            onClick={removeImage}
+                                            className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white"
+                                            aria-label="Remove image"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* URL Option */}
+                        {imageMode === "url" && (
+                            <div className="relative">
+                                <ImageIcon
+                                    size={18}
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                />
+
+                                <input
+                                    {...register("image")}
+                                    type="url"
+                                    placeholder="https://example.com/image.jpg"
+                                    className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 text-sm outline-none transition focus:border-black"
+                                />
+
+                                {imageUrl && (
+                                    <img
+                                        src={imageUrl}
+                                        alt="Profile preview"
+                                        className="mt-3 h-20 w-20 rounded-full border object-cover"
+                                        onError={(e) => {
+                                            e.currentTarget.style.display = "none";
+                                        }}
+                                    />
+                                )}
+
+                                {errors.image && (
+                                    <p className="mt-1 text-xs text-red-500">
+                                        {errors.image.message}
+                                    </p>
+                                )}
+                            </div>
                         )}
                     </div>
 
-                    {/* Submit Button */}
+                    {/* Sign Up Button */}
                     <button
                         type="submit"
                         disabled={isLoading || isGoogleLoading}
                         className="w-full rounded-lg bg-black py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                        {isLoading ? "Creating Account..." : "Create Account"}
+                        {isLoading ? "Creating Account..." : "Sign Up"}
                     </button>
 
                 </form>
@@ -239,7 +416,7 @@ export default function SignupPage() {
                     </div>
                 </div>
 
-                {/* Google Signup */}
+                {/* Google Sign Up */}
                 <button
                     type="button"
                     onClick={handleGoogleSignup}

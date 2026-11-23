@@ -1,15 +1,16 @@
 import { createAuthClient } from "better-auth/react";
-import { jwtClient } from "better-auth/client/plugins";
+import {
+    jwtClient,
+    inferAdditionalFields,
+} from "better-auth/client/plugins";
 
 export const authClient = createAuthClient({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
 
-    // Send session cookies with requests
     fetchOptions: {
         credentials: "include",
     },
 
-    // Session Management
     sessionOptions: {
         refetchOnWindowFocus: true,
         refetchInterval: 0,
@@ -17,6 +18,23 @@ export const authClient = createAuthClient({
     },
 
     plugins: [
+        inferAdditionalFields({
+            user: {
+                role: {
+                    type: "string",
+                    input: false,
+                },
+                isBlocked: {
+                    type: "boolean",
+                    input: false,
+                },
+                phoneNumber: {
+                    type: "string",
+                    required: false,
+                },
+            },
+        }),
+
         jwtClient(),
     ],
 });
