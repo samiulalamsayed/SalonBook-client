@@ -53,12 +53,10 @@ const DashboardSidebar = () => {
             return pathname === href;
         }
 
-        // Exact match for Add New Service
         if (href === "/admin/services/new") {
             return pathname === href;
         }
 
-        // Manage Services should not be active on Add New Service page
         if (href === "/admin/services") {
             return (
                 pathname === href ||
@@ -69,7 +67,7 @@ const DashboardSidebar = () => {
 
         return pathname === href || pathname.startsWith(`${href}/`);
     };
-    
+
     const sidebarContent = (
         <>
             <div className="mb-8">
@@ -114,50 +112,51 @@ const DashboardSidebar = () => {
     return (
         <>
             {/* Desktop Sidebar */}
-            <aside className="sticky top-18 hidden h-[calc(100vh-4.5rem)] w-64 shrink-0 border-r bg-background p-5 lg:block">
+            <aside className="hidden w-64 shrink-0 self-stretch border-r bg-background p-5 lg:block">
                 {sidebarContent}
             </aside>
 
-            {/* Mobile Sidebar */}
-            <div className="border-b bg-background p-3 lg:hidden">
+            {/* Mobile Dashboard Menu */}
+            <div className="px-4 pt-4 lg:hidden">
                 <button
                     type="button"
-                    onClick={() => setIsMobileOpen(!isMobileOpen)}
-                    aria-label={
-                        isMobileOpen
-                            ? "Close dashboard menu"
-                            : "Open dashboard menu"
-                    }
+                    onClick={() => setIsMobileOpen(true)}
+                    aria-label="Open dashboard menu"
                     aria-expanded={isMobileOpen}
-                    className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted"
+                    className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-muted"
                 >
-                    {isMobileOpen ? <X size={19} /> : <Menu size={19} />}
-                    Dashboard Menu
+                    <Menu size={19} />
+                    Dashboard
                 </button>
-
-                {isMobileOpen && (
-                    <div className="fixed inset-0 z-[60] bg-black/40">
-                        <div className="h-full w-72 max-w-[85%] overflow-y-auto bg-background p-5 shadow-xl">
-                            <div className="mb-6 flex items-center justify-between">
-                                <span className="font-semibold">
-                                    SalonBook
-                                </span>
-
-                                <button
-                                    type="button"
-                                    onClick={() => setIsMobileOpen(false)}
-                                    aria-label="Close menu"
-                                    className="rounded-md p-2 hover:bg-muted"
-                                >
-                                    <X size={20} />
-                                </button>
-                            </div>
-
-                            {sidebarContent}
-                        </div>
-                    </div>
-                )}
             </div>
+
+            {/* Mobile Drawer */}
+            {isMobileOpen && (
+                <div
+                    className="fixed inset-0 z-[60] bg-black/40 lg:hidden"
+                    onClick={() => setIsMobileOpen(false)}
+                >
+                    <aside
+                        className="h-full w-72 max-w-[85%] overflow-y-auto bg-background p-5 shadow-xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="mb-6 flex items-center justify-between">
+                            <span className="font-semibold">SalonBook</span>
+
+                            <button
+                                type="button"
+                                onClick={() => setIsMobileOpen(false)}
+                                aria-label="Close dashboard menu"
+                                className="rounded-md p-2 hover:bg-muted"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {sidebarContent}
+                    </aside>
+                </div>
+            )}
         </>
     );
 };
