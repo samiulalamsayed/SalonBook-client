@@ -8,7 +8,6 @@ import {
   Menu,
   Scissors,
   X,
-  UserRound,
   LayoutDashboard,
   LogOut,
   ChevronDown,
@@ -39,6 +38,15 @@ const Navbar = () => {
   const dashboardLink =
     role === "admin" ? "/admin" : "/customer";
 
+  // Dashboard link only for authenticated users
+  const authenticatedNavLinks = user
+    ? [
+      ...navLinks,
+      { name: "Dashboard", href: dashboardLink },
+    ]
+    : navLinks;
+
+  // Sign Out
   const handleSignOut = async () => {
     try {
       setIsSigningOut(true);
@@ -68,6 +76,7 @@ const Navbar = () => {
     }
   };
 
+  // Get User Initials
   const getInitials = (name?: string) => {
     return (
       name
@@ -99,11 +108,14 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden items-center gap-8 md:flex">
-          {navLinks.map((link) => (
+          {authenticatedNavLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              className={`text-sm font-medium transition-colors hover:text-primary ${link.name === "Dashboard"
+                  ? "text-primary"
+                  : "text-muted-foreground"
+                }`}
             >
               {link.name}
             </Link>
@@ -157,6 +169,7 @@ const Navbar = () => {
               {isProfileOpen && (
                 <div className="absolute right-0 top-full mt-3 w-56 rounded-xl border bg-background p-2 shadow-lg">
 
+                  {/* User Information */}
                   <div className="border-b px-3 py-3">
                     <p className="truncate text-sm font-semibold">
                       {user.name}
@@ -167,15 +180,19 @@ const Navbar = () => {
                     </p>
                   </div>
 
+                  {/* Dashboard Option */}
                   <Link
                     href={dashboardLink}
-                    onClick={() => setIsProfileOpen(false)}
+                    onClick={() =>
+                      setIsProfileOpen(false)
+                    }
                     className="mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted"
                   >
                     <LayoutDashboard size={17} />
                     Dashboard
                   </Link>
 
+                  {/* Sign Out */}
                   <button
                     type="button"
                     disabled={isSigningOut}
@@ -183,13 +200,16 @@ const Navbar = () => {
                     className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
                   >
                     <LogOut size={17} />
-                    {isSigningOut ? "Signing Out..." : "Sign Out"}
+                    {isSigningOut
+                      ? "Signing Out..."
+                      : "Sign Out"}
                   </button>
                 </div>
               )}
             </div>
           ) : (
             <>
+              {/* Sign In */}
               <Link
                 href="/sign-in"
                 className="inline-flex h-8 items-center justify-center rounded-lg px-2.5 text-sm font-medium transition-colors hover:bg-muted"
@@ -197,6 +217,7 @@ const Navbar = () => {
                 Sign In
               </Link>
 
+              {/* Sign Up */}
               <Link
                 href="/sign-up"
                 className="inline-flex h-8 items-center justify-center rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
@@ -224,12 +245,16 @@ const Navbar = () => {
         <div className="border-t bg-background px-4 py-5 md:hidden">
           <div className="flex flex-col gap-4">
 
-            {navLinks.map((link) => (
+            {/* Navigation Links */}
+            {authenticatedNavLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setIsMenuOpen(false)}
-                className="text-sm font-medium text-muted-foreground hover:text-primary"
+                className={`text-sm font-medium transition-colors hover:text-primary ${link.name === "Dashboard"
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                  }`}
               >
                 {link.name}
               </Link>
@@ -240,6 +265,7 @@ const Navbar = () => {
 
                 {user ? (
                   <>
+                    {/* Mobile User Information */}
                     <div className="flex items-center gap-3 px-2 py-2">
                       {user.image ? (
                         <Image
@@ -260,41 +286,40 @@ const Navbar = () => {
                         <p className="truncate text-sm font-semibold">
                           {user.name}
                         </p>
+
                         <p className="truncate text-xs text-muted-foreground">
                           {user.email}
                         </p>
                       </div>
                     </div>
 
-                    <Link
-                      href={dashboardLink}
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex h-9 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-medium transition-colors hover:bg-muted"
-                    >
-                      <LayoutDashboard size={17} />
-                      Dashboard
-                    </Link>
-
+                    {/* Sign Out */}
                     <Button
                       variant="destructive"
                       disabled={isSigningOut}
                       onClick={handleSignOut}
                     >
                       <LogOut size={17} />
-                      {isSigningOut ? "Signing Out..." : "Sign Out"}
+                      {isSigningOut
+                        ? "Signing Out..."
+                        : "Sign Out"}
                     </Button>
                   </>
                 ) : (
                   <>
+                    {/* Sign In */}
                     <Link
                       href="/sign-in"
+                      onClick={() => setIsMenuOpen(false)}
                       className="flex h-9 items-center justify-center rounded-lg border px-4 text-sm font-medium hover:bg-muted"
                     >
                       Sign In
                     </Link>
 
+                    {/* Sign Up */}
                     <Link
                       href="/sign-up"
+                      onClick={() => setIsMenuOpen(false)}
                       className="flex h-9 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/80"
                     >
                       Sign Up
